@@ -1,5 +1,5 @@
 # CheckinHoyoverse
-Using cookies and api hoyoverse to auto checkin web
+Using cookies and api hoyoverse to checkin web
 # How to get cookies?
 * Copy this `javascript:alert(document.cookie)`
 * Open broswer to checkin web
