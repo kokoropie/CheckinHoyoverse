@@ -34,6 +34,7 @@ namespace CheckinHoyoverse
         static readonly string logFile = $"{DateTime.Now.Year}-{DateTime.Now.Month:00}-{DateTime.Now.Day:00}";
         static readonly string key = "KagaAkatsuki0705";
         static readonly string keyStartup = $"{appName} startup";
+        static readonly string version = "1.1.1";
         static readonly RegistryKey rk = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
 
         static ConfigJson? config = null;
@@ -245,6 +246,12 @@ namespace CheckinHoyoverse
                         config = JsonSerializer.Deserialize<ConfigJson>(json);
                         reader.Close();
                         config.current_user_agent = new Random().Next(0, config.userAgent.Count - 1);
+                        if (config.version != version)
+                        {
+                            string currentLang = config.lang;
+                            Reset(false);
+                            config.lang = currentLang;
+                        }
                     }
                 } else {
                     Create();
@@ -270,37 +277,7 @@ namespace CheckinHoyoverse
             using (StreamWriter writer = new StreamWriter(configFilePath))
             {
                 ConfigJson newConfig = new ConfigJson();
-
-                newConfig.url.gi.info = "https://sg-hk4e-api.hoyolab.com/event/sol/info";
-                newConfig.url.gi.sign = "https://sg-hk4e-api.hoyolab.com/event/sol/sign";
-                newConfig.url.gi.home = "https://sg-hk4e-api.hoyolab.com/event/sol/home";
-                newConfig.url.gi.act_id = "e202102251931481";
-
-                newConfig.url.hi3.info = "https://sg-public-api.hoyolab.com/event/mani/info";
-                newConfig.url.hi3.sign = "https://sg-public-api.hoyolab.com/event/mani/sign";
-                newConfig.url.hi3.home = "https://sg-public-api.hoyolab.com/event/mani/home";
-                newConfig.url.hi3.act_id = "e202110291205111";
-
-                newConfig.url.hsr.info = "https://sg-public-api.hoyolab.com/event/luna/os/info";
-                newConfig.url.hsr.sign = "https://sg-public-api.hoyolab.com/event/luna/os/sign";
-                newConfig.url.hsr.home = "https://sg-public-api.hoyolab.com/event/luna/os/home";
-                newConfig.url.hsr.act_id = "e202303301540311";
-
-                newConfig.userAgent.Add("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.164 Safari/537.36");
-                newConfig.userAgent.Add("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.107 Safari/537.36");
-                newConfig.userAgent.Add("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Firefox/89.0.2");
-                newConfig.userAgent.Add("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Firefox/91.0");
-                newConfig.userAgent.Add("Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:89.0) Gecko/20100101 Firefox/89.0");
-                newConfig.userAgent.Add("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.1 Safari/605.1.15");
-                newConfig.userAgent.Add("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36 Edg/91.0.864.59");
-                newConfig.userAgent.Add("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.107 Safari/537.36 OPR/77.0.4054.277");
-                newConfig.userAgent.Add("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
-                newConfig.userAgent.Add("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.131 Safari/537.36");
-
-                newConfig.current_user_agent = 0;
-
-                newConfig.lang = "en-us";
-                newConfig.api_lang = "https://bbs-api-os.hoyolab.com/community/misc/wapi/langs";
+                newConfig.version = version;
 
                 string json = JsonSerializer.Serialize(newConfig);
 
@@ -407,11 +384,15 @@ namespace CheckinHoyoverse
                     using (HttpClientHandler handler = new HttpClientHandler())
                     {
                         handler.CookieContainer = new CookieContainer();
-                        foreach (string cookie in cookies)
-                        {
-                            string[] nameValue = cookie.Split("=");
-                            handler.CookieContainer.Add(new Uri(config.url.gi.info), new Cookie(nameValue[0].Trim(), cookie.Substring(nameValue[0].Length + 1).Trim()));
-                        }
+                        if (cookies.Length > 0)
+                            foreach (string cookie in cookies)
+                            {
+                                string[] nameValue = cookie.Split("=");
+                                try
+                                {
+                                    handler.CookieContainer.Add(new Uri(config.url.gi.info), new Cookie(nameValue[0].Trim(), cookie.Substring(nameValue[0].Length + 1).Trim()));
+                                } catch { }
+                            }
 
                         using (HttpClient client = new HttpClient(handler))
                         {
@@ -519,11 +500,15 @@ namespace CheckinHoyoverse
                     using (HttpClientHandler handler = new HttpClientHandler())
                     {
                         handler.CookieContainer = new CookieContainer();
-                        foreach (string cookie in cookies)
-                        {
-                            string[] nameValue = cookie.Split("=");
-                            handler.CookieContainer.Add(new Uri(config.url.hi3.info), new Cookie(nameValue[0].Trim(), nameValue[1].Trim()));
-                        }
+                        if (cookies.Length > 0)
+                            foreach (string cookie in cookies)
+                            {
+                                string[] nameValue = cookie.Split("=");
+                                try
+                                {
+                                    handler.CookieContainer.Add(new Uri(config.url.hi3.info), new Cookie(nameValue[0].Trim(), nameValue[1].Trim()));
+                                } catch { }
+                            }
 
                         using (HttpClient client = new HttpClient(handler))
                         {
@@ -627,11 +612,15 @@ namespace CheckinHoyoverse
                     using (HttpClientHandler handler = new HttpClientHandler())
                     {
                         handler.CookieContainer = new CookieContainer();
-                        foreach (string cookie in cookies)
-                        {
-                            string[] nameValue = cookie.Split("=");
-                            handler.CookieContainer.Add(new Uri(config.url.hsr.info), new Cookie(nameValue[0].Trim(), nameValue[1].Trim()));
-                        }
+                        if (cookies.Length > 0)
+                            foreach (string cookie in cookies)
+                            {
+                                string[] nameValue = cookie.Split("=");
+                                try
+                                {
+                                    handler.CookieContainer.Add(new Uri(config.url.hsr.info), new Cookie(nameValue[0].Trim(), nameValue[1].Trim()));
+                                } catch { }
+                            }
 
                         using (HttpClient client = new HttpClient(handler))
                         {
@@ -729,6 +718,118 @@ namespace CheckinHoyoverse
                         }
                     }
                 }
+
+                if (data.tot)
+                {
+                    using (HttpClientHandler handler = new HttpClientHandler())
+                    {
+                        handler.CookieContainer = new CookieContainer();
+                        if (cookies.Length > 0)
+                            foreach (string cookie in cookies)
+                            {
+                                string[] nameValue = cookie.Split("=");
+                                try
+                                {
+                                    handler.CookieContainer.Add(new Uri(config.url.tot.info), new Cookie(nameValue[0].Trim(), nameValue[1].Trim()));
+                                } catch { }
+                            }
+
+                        using (HttpClient client = new HttpClient(handler))
+                        {
+                            client.DefaultRequestHeaders.UserAgent.ParseAdd(config.userAgent[config.current_user_agent]);
+                            Log("- Checking Tears of Themis...", $"{logFile}.log");
+                            Log("- Checking Tears of Themis...", $"{logFile}.action.log", false);
+
+                            UriBuilder uriInfo = new UriBuilder(config.url.tot.info);
+                            uriInfo.Query = String.Format("act_id={0}&lang={1}", config.url.tot.act_id, config.lang);
+
+                            Log($"- [REQUEST:GET] {uriInfo}", $"{logFile}.action.log", false);
+                            HttpResponseMessage responseInfo = await client.GetAsync(uriInfo.ToString());
+
+                            if (responseInfo.IsSuccessStatusCode)
+                            {
+                                string json = await responseInfo.Content.ReadAsStringAsync();
+                                Log($"- [RESPONSE] {json}", $"{logFile}.action.log", false);
+                                TOT.InfoJson infoJson = JsonSerializer.Deserialize<TOT.InfoJson>(json);
+                                if (infoJson.retcode == 0)
+                                {
+                                    if (infoJson.data.is_sign)
+                                    {
+                                        Log("-- Attorney, you've already checked in today~", $"{logFile}.log");
+                                    }
+                                    else
+                                    {
+                                        UriBuilder uriHome = new UriBuilder(config.url.tot.home);
+                                        uriHome.Query = String.Format("act_id={0}&lang={1}", config.url.tot.act_id, config.lang);
+                                        Log($"- [REQUEST:GET] {uriHome}", $"{logFile}.action.log", false);
+                                        HttpResponseMessage responseHome = await client.GetAsync(uriHome.ToString());
+                                        string responseContentHome = await responseHome.Content.ReadAsStringAsync();
+                                        Log($"- [RESPONSE] {responseContentHome}", $"{logFile}.action.log", false);
+                                        TOT.HomeJson homeJson = JsonSerializer.Deserialize<TOT.HomeJson>(responseContentHome);
+
+                                        UriBuilder uriSign = new UriBuilder(config.url.tot.sign);
+                                        uriSign.Query = String.Format("lang={0}", config.lang);
+                                        string jsonContentSign = "{\"act_id\":\"" + config.url.tot.act_id + "\"}";
+                                        HttpContent contentSign = new StringContent(jsonContentSign, Encoding.UTF8, "application/responseContentInfo");
+                                        Log($"- [REQUEST:POST] {config.url.tot.sign}", $"{logFile}.action.log", false);
+                                        Log($"- [REQUEST:POST:CONTENT] {jsonContentSign}", $"{logFile}.action.log", false);
+                                        HttpResponseMessage responseSign = await client.PostAsync(uriSign.ToString(), contentSign);
+                                        if (responseSign.IsSuccessStatusCode)
+                                        {
+                                            string responseContentSign = await responseSign.Content.ReadAsStringAsync();
+                                            Log($"- [RESPONSE] {responseContentSign}", $"{logFile}.action.log", false);
+                                            TOT.SignJson signJson = JsonSerializer.Deserialize<TOT.SignJson>(responseContentSign);
+                                            if (signJson.retcode != 0)
+                                            {
+                                                Log($"[SIGN]: {signJson.message}", $"{logFile}.log");
+                                            }
+                                            else
+                                            {
+                                                //if (signJson.data.gt_result.is_risk)
+                                                //{
+                                                //    Log("-- [RISK]: It's risk. Please check in by yourself, Attorney. You must to pass the challenge.");
+                                                //}
+                                                //else
+                                                //{
+                                                Log("-- Attorney, you successfully checked in today~", $"{logFile}.log");
+                                                if (homeJson.retcode == 0)
+                                                {
+                                                    Log($"-- {homeJson.data.awards[infoJson.data.total_sign_day].name} x{homeJson.data.awards[infoJson.data.total_sign_day].cnt}", $"{logFile}.log");
+                                                }
+                                                //}
+                                            }
+                                        }
+                                        else
+                                        {
+                                            Log($"-- HTTP request failed with status code: {responseSign.StatusCode}", $"{logFile}.log");
+                                            foreach (var header in responseSign.Headers)
+                                            {
+                                                Log($"-- [HEADER]: {header.Key}: {header.Value}", $"{logFile}.action.log", false);
+                                            }
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    Log($"[INFO]: {infoJson.message}", $"{logFile}.log");
+                                    Log($"[INFO]: {infoJson.message}", $"{logFile}.action.log", false);
+                                    foreach (var header in responseInfo.Headers)
+                                    {
+                                        Log($"-- [HEADER]: {header.Key}: {header.Value}", $"{logFile}.action.log", false);
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                Log($"-- HTTP request failed with status code: {responseInfo.StatusCode}", $"{logFile}.log");
+                                foreach (var header in responseInfo.Headers)
+                                {
+                                    Log($"-- [HEADER]: {header.Key}: {header.Value}", $"{logFile}.action.log", false);
+                                }
+                            }
+                        }
+                    }
+                }
                 Log("", $"{logFile}.log");
 
                 i++;
@@ -744,9 +845,9 @@ namespace CheckinHoyoverse
         {
             Console.Clear();
 
-            ConsoleTable table = new ConsoleTable($"Name ({config.data.Count})", "GI", "HI3", "HSR");
+            ConsoleTable table = new ConsoleTable($"Name ({config.data.Count})", "GI", "HI3", "HSR", "TOT");
             config.data.ForEach(data => {
-                table.AddRow(data.name, data.gi ? "✅" : "❎", data.hi3 ? "✅" : "❎", data.hsr ? "✅" : "❎");
+                table.AddRow(data.name, data.gi ? "✓" : "✗", data.hi3 ? "✓" : "✗", data.hsr ? "✓" : "✗", data.tot ? "✓" : "✗");
             });
             table.Write(Format.MarkDown);
 
@@ -778,14 +879,17 @@ namespace CheckinHoyoverse
 
             Console.Write("Cookies: ");
             newData.cookies = Console.ReadLine();
-            Console.Write("Have Genshin Impact? [\u001b[33mY/N]");
+            Console.Write("Have Genshin Impact? [\u001b[33mY\u001b[0m/N]");
             newData.gi = Console.ReadKey().Key != ConsoleKey.N;
             Console.Write("\r" + new String(' ', Console.WindowWidth));
-            Console.Write("\rHave Honkai Impact 3? [\u001b[33mY/N]");
+            Console.Write("\rHave Honkai Impact 3? [\u001b[33mY\u001b[0m/N]");
             newData.hi3 = Console.ReadKey().Key != ConsoleKey.N;
             Console.Write("\r" + new String(' ', Console.WindowWidth));
-            Console.Write("\rHave Honkai: Star Rail? [\u001b[33mY/N]");
+            Console.Write("\rHave Honkai: Star Rail? [\u001b[33mY\u001b[0m/N]");
             newData.hsr = Console.ReadKey().Key != ConsoleKey.N;
+            Console.Write("\r" + new String(' ', Console.WindowWidth));
+            Console.Write("\rHave Tears of Themis? [\u001b[33mY\u001b[0m/N]");
+            newData.tot = Console.ReadKey().Key != ConsoleKey.N;
 
             config.data.Add(newData);
             Log($"Add account {newData.name}", $"{logFile}.action.log", false);
@@ -829,22 +933,28 @@ namespace CheckinHoyoverse
                 if (newCookies.Length > 0)
                     currentData.cookies = newCookies;
 
-                Console.Write("Have Genshin Impact? [{0}] ", currentData.gi ? "[\u001b[33mY/N]" : "[Y/\u001b[33mN]");
+                Console.Write("Have Genshin Impact? [{0}] ", currentData.gi ? "\u001b[33mY\u001b[0m/N" : "Y/\u001b[33mN\u001b[0m");
                 ConsoleKey gi = Console.ReadKey().Key;
                 if ((gi == ConsoleKey.Y && !currentData.gi) || (gi == ConsoleKey.N && currentData.gi))
                     currentData.gi = !currentData.gi;
 
                 Console.Write("\r" + new String(' ', Console.WindowWidth));
-                Console.Write("\rHave Honkai Impact 3? [{0}] ", currentData.hi3 ? "[\u001b[33mY/N]" : "[Y/\u001b[33mN]");
+                Console.Write("\rHave Honkai Impact 3? [{0}] ", currentData.hi3 ? "\u001b[33mY\u001b[0m/N" : "Y/\u001b[33mN\u001b[0m");
                 ConsoleKey hi3 = Console.ReadKey().Key;
                 if ((hi3 == ConsoleKey.Y && !currentData.hi3) || (hi3 == ConsoleKey.N && currentData.hi3))
                     currentData.hi3 = !currentData.hi3;
 
                 Console.Write("\r" + new String(' ', Console.WindowWidth));
-                Console.Write("\rHave Honkai: Star Rail? [{0}] ", currentData.hsr ? "[\u001b[33mY/N]" : "[Y/\u001b[33mN]");
+                Console.Write("\rHave Honkai: Star Rail? [{0}] ", currentData.hsr ? "\u001b[33mY\u001b[0m/N" : "Y/\u001b[33mN\u001b[0m");
                 ConsoleKey hsr = Console.ReadKey().Key;
                 if ((hsr == ConsoleKey.Y && !currentData.hsr) || (hsr == ConsoleKey.N && currentData.hsr))
                     currentData.hsr = !currentData.hsr;
+
+                Console.Write("\r" + new String(' ', Console.WindowWidth));
+                Console.Write("\rHave Tears of Themis? [{0}] ", currentData.tot ? "\u001b[33mY\u001b[0m/N" : "Y/\u001b[33mN\u001b[0m");
+                ConsoleKey tot = Console.ReadKey().Key;
+                if ((tot == ConsoleKey.Y && !currentData.tot) || (tot == ConsoleKey.N && currentData.tot))
+                    currentData.tot = !currentData.tot;
 
                 Log($"[TO] {currentData}", $"{logFile}.action.log", false);
             } else {
@@ -995,22 +1105,30 @@ namespace CheckinHoyoverse
 
         static void Reset()
         {
+            Reset(true);
+        }
+
+        static void Reset(bool console)
+        {
             bool data = false;
-            List<string> menu = new List<string>();
-            menu.Add("Without data");
-            menu.Add("With data");
-            menu.Add("Back");
-            switch (ShowMenu("Reset config", menu))
+            if (console)
             {
-                case 2:
-                    data = true;
-                    break;
+                List<string> menu = new List<string>();
+                menu.Add("Without data");
+                menu.Add("With data");
+                menu.Add("Back");
+                switch (ShowMenu("Reset config", menu))
+                {
+                    case 2:
+                        data = true;
+                        break;
 
-                case 3:
+                    case 3:
 
-                    return;
-                default:
-                    break;
+                        return;
+                    default:
+                        break;
+                }
             }
 
             if (data)
@@ -1034,44 +1152,19 @@ namespace CheckinHoyoverse
 
             using (StreamWriter writer = new StreamWriter(configFilePath))
             {
-                config.url.gi.info = "https://sg-hk4e-api.hoyolab.com/event/sol/info";
-                config.url.gi.sign = "https://sg-hk4e-api.hoyolab.com/event/sol/sign";
-                config.url.gi.home = "https://sg-hk4e-api.hoyolab.com/event/sol/home";
-                config.url.gi.act_id = "e202102251931481";
-
-                config.url.hi3.info = "https://sg-public-api.hoyolab.com/event/mani/info";
-                config.url.hi3.sign = "https://sg-public-api.hoyolab.com/event/mani/sign";
-                config.url.hi3.home = "https://sg-public-api.hoyolab.com/event/mani/home";
-                config.url.hi3.act_id = "e202110291205111";
-
-                config.url.hsr.info = "https://sg-public-api.hoyolab.com/event/luna/os/info";
-                config.url.hsr.sign = "https://sg-public-api.hoyolab.com/event/luna/os/sign";
-                config.url.hsr.home = "https://sg-public-api.hoyolab.com/event/luna/os/home";
-                config.url.hsr.act_id = "e202303301540311";
-
-                config.userAgent.Clear();
-
-                config.userAgent.Add("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.164 Safari/537.36");
-                config.userAgent.Add("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.107 Safari/537.36");
-                config.userAgent.Add("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Firefox/89.0.2");
-                config.userAgent.Add("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Firefox/91.0");
-                config.userAgent.Add("Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:89.0) Gecko/20100101 Firefox/89.0");
-                config.userAgent.Add("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.1 Safari/605.1.15");
-                config.userAgent.Add("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36 Edg/91.0.864.59");
-                config.userAgent.Add("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.107 Safari/537.36 OPR/77.0.4054.277");
-                config.userAgent.Add("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
-                config.userAgent.Add("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.131 Safari/537.36");
-
-                config.current_user_agent = 0;
-
-                config.lang = "en-us";
-                config.api_lang = "https://bbs-api-os.hoyolab.com/community/misc/wapi/langs";
+                ConfigJson newConfig = new ConfigJson();
 
                 if (data)
                 {
-                    Console.WriteLine("Resetting data...");
-                    config.data.Clear();
+                    if (console) Console.WriteLine("Resetting data...");
                 }
+                else
+                {
+                    newConfig.data = config.data;
+                }
+
+                newConfig.version = version;
+                config = newConfig;
 
                 string json = JsonSerializer.Serialize(config);
 
@@ -1080,9 +1173,12 @@ namespace CheckinHoyoverse
                 writer.Close();
             }
 
-            Console.WriteLine("Reset successful!");
-            Console.WriteLine("Press any key to back...");
-            Console.ReadKey();
+            if (console)
+            {
+                Console.WriteLine("Reset successful!");
+                Console.WriteLine("Press any key to back...");
+                Console.ReadKey();
+            }
         }
 
         static void ExportData()
