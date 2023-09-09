@@ -42,99 +42,89 @@ namespace CheckinHoyoverse
         static async Task Main(string[] args)
         {   
             await Init(args);
+
+            Console.Clear();
+            List<string> menu = new List<string>();
+            int option = 1;
             while (true)
             {
-                Console.Clear();
-                Console.WriteLine($"------ Menu ------");
-                Console.WriteLine("A. Checkin");
-                Console.WriteLine("B. List account");
-                Console.WriteLine("C. Add account");
-                Console.WriteLine("D. Edit account");
-                Console.WriteLine("E. Remove account");
-                Console.WriteLine("F. {0} check in when start with windows", isStartup ? "Disable" : "Enable");
-                Console.WriteLine($"G. Show log {logFile}");
-                Console.WriteLine("H. Show log folder");
-                Console.WriteLine("I. Clear log");
-                Console.WriteLine($"J. Change language check in ({config.lang})");
-                Console.WriteLine("K. Reset config (without data)");
-                Console.WriteLine("L. Reset config (with data)");
-                Console.WriteLine("M. Export data");
-                Console.WriteLine("N. Import data");
-                Console.WriteLine("X. Close");
-                Console.WriteLine("Z. Close (without saving)");
-                Console.Write("Enter your choice: ");
-
-                switch (Console.ReadKey().Key)
+                menu.Clear();
+                menu.Add("Checkin");
+                menu.Add("List account");
+                menu.Add("Add account");
+                menu.Add("Edit account");
+                menu.Add("Remove account");
+                menu.Add(string.Format("{0} check in when start with windows", isStartup ? "Disable" : "Enable"));
+                menu.Add($"Show log {logFile}");
+                menu.Add("Show log folder");
+                menu.Add("Clear log");
+                menu.Add($"Change language check in ({config.lang})");
+                menu.Add("Reset config");
+                menu.Add("Export data");
+                menu.Add("Import data");
+                menu.Add("Close");
+                menu.Add("Close (without saving)");
+                switch (option = ShowMenu("Menu", menu, option))
                 {
-                    case ConsoleKey.A:
+                    case 1:
                         await Checkin();
                         break;
 
-                    case ConsoleKey.B:
+                    case 2:
                         List();
                         break;
 
-                    case ConsoleKey.C:
+                    case 3:
                         Add();
                         break;
 
-                    case ConsoleKey.D:
+                    case 4:
                         Edit();
                         break;
 
-                    case ConsoleKey.E:
+                    case 5:
                         Remove();
                         break;
 
-                    case ConsoleKey.F:
+                    case 6:
                         Startup();
                         break;
 
-                    case ConsoleKey.G:
+                    case 7:
                         ShowLog();
                         break;
 
-                    case ConsoleKey.H:
+                    case 8:
                         ShowLogFolder();
                         break;
 
-                    case ConsoleKey.I:
+                    case 9:
                         ClearLog();
                         break;
 
-                    case ConsoleKey.J:
+                    case 10:
                         await ChangeLanguage();
                         break;
 
-                    case ConsoleKey.K:
+                    case 11:
                         Reset();
                         break;
 
-                    case ConsoleKey.L:
-                        Reset(true);
-                        break;
-
-                    case ConsoleKey.M:
+                    case 12:
                         ExportData();
                         break;
 
-                    case ConsoleKey.N:
+                    case 13:
                         ImportData();
                         break;
 
-                    case ConsoleKey.T:
-                        Console.Clear();
-                        Console.WriteLine(JsonSerializer.Serialize(config));
-                        Console.ReadKey();
-                        break;
-
-                    case ConsoleKey.X:
+                    case 14:
                         Save();
                         Console.WriteLine("Closing...");
                         Log($"Close app", $"{logFile}.action.log", false);
                         return;
 
-                    case ConsoleKey.Z:
+                    case 15:
                         Console.Clear();
                         Console.WriteLine("Closing...");
                         Log($"Close app without saving", $"{logFile}.action.log", false);
@@ -198,6 +188,45 @@ namespace CheckinHoyoverse
             }
             SetConsoleCtrlHandler(Handler, true);
             Load();
+        }
+
+        static int ShowMenu(string title, List<string> menu)
+        {
+            return ShowMenu(title, menu, 1);
+        }
+
+        static int ShowMenu(string title, List<string> menu, int option)
+        {
+            bool selected = false;
+
+            while (!selected)
+            {
+                Console.Clear();
+                Console.WriteLine($"------ {title} ------");
+                for (int i = 0; i < menu.Count; i++)
+                {
+                    Console.WriteLine("{0} {1}\u001b[0m", option == i + 1 ? "✅\u001b[32m" : "  ", menu[i]);
+                }
+                Console.Write("Use ⬆️ and ⬇️ to navigate and press \u001b[31mEnter\u001b[0m key to select");
+                switch (Console.ReadKey().Key)
+                {
+                    case ConsoleKey.UpArrow:
+                        option--;
+                        if (option < 1) option = menu.Count;
+                        break;
+
+                    case ConsoleKey.DownArrow:
+                        option++;
+                        if (option > menu.Count) option = 1;
+                        break;
+
+                    case ConsoleKey.Enter:
+                        selected = true;
+                        break;
+                }
+            }
+
+            return option;
         }
 
         static void Load()
@@ -717,7 +746,7 @@ namespace CheckinHoyoverse
 
             ConsoleTable table = new ConsoleTable($"Name ({config.data.Count})", "GI", "HI3", "HSR");
             config.data.ForEach(data => {
-                table.AddRow(data.name, data.gi ? "Yes" : "No", data.hi3 ? "Yes" : "No", data.hsr ? "Yes" : "No");
+                table.AddRow(data.name, data.gi ? "✅" : "❎", data.hi3 ? "✅" : "❎", data.hsr ? "✅" : "❎");
             });
             table.Write(Format.MarkDown);
 
@@ -749,13 +778,13 @@ namespace CheckinHoyoverse
 
             Console.Write("Cookies: ");
             newData.cookies = Console.ReadLine();
-            Console.Write("Have Genshin Impact (Y/N)? [Y] ");
+            Console.Write("Have Genshin Impact? [\u001b[33mY/N]");
             newData.gi = Console.ReadKey().Key != ConsoleKey.N;
             Console.Write("\r" + new String(' ', Console.WindowWidth));
-            Console.Write("\rHave Honkai Impact 3 (Y/N)? [Y] ");
+            Console.Write("\rHave Honkai Impact 3? [\u001b[33mY/N]");
             newData.hi3 = Console.ReadKey().Key != ConsoleKey.N;
             Console.Write("\r" + new String(' ', Console.WindowWidth));
-            Console.Write("\rHave Honkai: Star Rail (Y/N)? [Y] ");
+            Console.Write("\rHave Honkai: Star Rail? [\u001b[33mY/N]");
             newData.hsr = Console.ReadKey().Key != ConsoleKey.N;
 
             config.data.Add(newData);
@@ -771,7 +800,6 @@ namespace CheckinHoyoverse
             string name = Console.ReadLine();
             if (name.Length == 0) return;
 
-            //DataHome searchData = config.data.Find(data => data.name == name);
             List<Data> searchData = config.data.FindAll(data => data.name.ToLower().Contains(name.ToLower()));
             if (searchData.Count > 0) {
                 Data currentData = null;
@@ -780,31 +808,13 @@ namespace CheckinHoyoverse
                     currentData = searchData.First();
                 } else
                 {
-                    while (true)
-                    {
-                        Console.Clear();
-                        Console.WriteLine("------ Edit ------");
-                        for (int i = 0; i < searchData.Count; i++)
-                            Console.WriteLine("{0}. {1}", i + 1, searchData[i].name);
-                        Console.WriteLine("{0}. {1}", 0, "Back");
-                        Console.Write("Choose one: ");
-                        string ch = Console.ReadLine();
-                        if (ch.Length == 0 || !double.TryParse(ch, out _)) continue;
-                        int c = int.Parse(ch);
-                        if (c == 0) return;
-                        if (c < 1 || c > searchData.Count)
-                        {
-                            Console.Clear();
-                            Console.WriteLine("------ Edit ------");
-                            Console.WriteLine("The choice doesn't exist");
-                            Console.WriteLine("Press any key to continue...");
-                            Console.ReadKey();
-                        } else
-                        {
-                            currentData = searchData[c - 1];
-                            break;
-                        }
-                    }
+                    List<string> menu = new List<string>();
+                    for (int i = 0; i < searchData.Count; i++)
+                        menu.Add(searchData[i].name);
+                    menu.Add("Back");
+                    int option = ShowMenu("Edit", menu);
+                    if (option == searchData.Count + 1) return;
+                    currentData = searchData[option - 1];
                 }
 
                 Console.Clear();
@@ -819,19 +829,19 @@ namespace CheckinHoyoverse
                 if (newCookies.Length > 0)
                     currentData.cookies = newCookies;
 
-                Console.Write("Have Genshin Impact (Y/N)? [{0}] ", currentData.gi ? "Y" : "N");
+                Console.Write("Have Genshin Impact? [{0}] ", currentData.gi ? "[\u001b[33mY/N]" : "[Y/\u001b[33mN]");
                 ConsoleKey gi = Console.ReadKey().Key;
                 if ((gi == ConsoleKey.Y && !currentData.gi) || (gi == ConsoleKey.N && currentData.gi))
                     currentData.gi = !currentData.gi;
 
                 Console.Write("\r" + new String(' ', Console.WindowWidth));
-                Console.Write("\rHave Honkai Impact 3 (Y/N)? [{0}] ", currentData.hi3 ? "Y" : "N");
+                Console.Write("\rHave Honkai Impact 3? [{0}] ", currentData.hi3 ? "[\u001b[33mY/N]" : "[Y/\u001b[33mN]");
                 ConsoleKey hi3 = Console.ReadKey().Key;
                 if ((hi3 == ConsoleKey.Y && !currentData.hi3) || (hi3 == ConsoleKey.N && currentData.hi3))
                     currentData.hi3 = !currentData.hi3;
 
                 Console.Write("\r" + new String(' ', Console.WindowWidth));
-                Console.Write("\rHave Honkai: Star Rail (Y/N)? [{0}] ", currentData.hsr ? "Y" : "N");
+                Console.Write("\rHave Honkai: Star Rail? [{0}] ", currentData.hsr ? "[\u001b[33mY/N]" : "[Y/\u001b[33mN]");
                 ConsoleKey hsr = Console.ReadKey().Key;
                 if ((hsr == ConsoleKey.Y && !currentData.hsr) || (hsr == ConsoleKey.N && currentData.hsr))
                     currentData.hsr = !currentData.hsr;
@@ -865,34 +875,15 @@ namespace CheckinHoyoverse
                 }
                 else if (searchData.Count >= 2)
                 {
-                    while (true)
-                    {
-                        Console.Clear();
-                        Console.WriteLine("------ Remove ------");
-                        for (int i = 0; i < searchData.Count; i++)
-                            Console.WriteLine("{0}. {1}", i + 1, searchData[i].name);
-                        Console.WriteLine("{0}. {1}", 0, "Back");
-                        Console.Write("Choose one: ");
-                        string ch = Console.ReadLine();
-                        if (ch.Length == 0 || !double.TryParse(ch, out _)) continue;
-                        int c = int.Parse(ch);
-                        if (c == 0) return;
-                        if (c < 1 || c > searchData.Count)
-                        {
-                            Console.Clear();
-                            Console.WriteLine("------ Remove ------");
-                            Console.WriteLine("The choice doesn't exist");
-                            Console.WriteLine("Press any key to continue...");
-                            Console.ReadKey();
-                        }
-                        else
-                        {
-                            Log($"Remove account {searchData[c - 1].name}", $"{logFile}.action.log", false);
-                            Log($"{searchData[c - 1]}", $"{logFile}.action.log", false);
-                            config.data.Remove(searchData[c - 1]);
-                            break;
-                        }
-                    }
+                    List<string> menu = new List<string>();
+                    for (int i = 0; i < searchData.Count; i++)
+                        menu.Add(searchData[i].name);
+                    menu.Add("Back");
+                    int option = ShowMenu("Edit", menu);
+                    if (option == searchData.Count + 1) return;
+                    Log($"Remove account {searchData[option - 1].name}", $"{logFile}.action.log", false);
+                    Log($"{searchData[option - 1]}", $"{logFile}.action.log", false);
+                    config.data.Remove(searchData[option - 1]);
                 }
             }
         }
@@ -973,28 +964,13 @@ namespace CheckinHoyoverse
                     LangsJson langsJson = JsonSerializer.Deserialize<LangsJson>(json);
                     if (langsJson.retcode == 0)
                     {
-                        while (true)
-                        {
-                            Console.Clear();
-                            Console.WriteLine("------ Change Language Check In ------");
-                            for (int i = 0; i < langsJson.data.langs.Count; i++)
-                                Console.WriteLine("{0}. {1} ({2})", i + 1, langsJson.data.langs[i].name, langsJson.data.langs[i].value);
-                            Console.WriteLine("{0}. {1}", 0, "Back");
-                            Console.Write("Choose one: ");
-                            string ch = Console.ReadLine();
-                            if (ch.Length == 0 || !double.TryParse(ch, out _)) continue;
-                            int c = int.Parse(ch);
-                            if (c == 0) return;
-                            if (c < 1 || c > langsJson.data.langs.Count)
-                            {
-                                continue;
-                            }
-                            else
-                            {
-                                config.lang = langsJson.data.langs[c - 1].value;
-                                break;
-                            }
-                        }
+                        List<string> menu = new List<string>();
+                        for (int i = 0; i < langsJson.data.langs.Count; i++)
+                            menu.Add(string.Format("{0} ({1})", langsJson.data.langs[i].name, langsJson.data.langs[i].value));
+                        menu.Add("Back");
+                        int option = ShowMenu("Change Language Check In", menu);
+                        if (option == langsJson.data.langs.Count + 1) return;
+                        config.lang = langsJson.data.langs[option - 1].value;
                     }
                     else
                     {
@@ -1017,21 +993,36 @@ namespace CheckinHoyoverse
             }
         }
 
-        static void Reset(bool data = false)
+        static void Reset()
         {
-            Console.Clear();
-            Console.WriteLine("Resetting...");
+            bool data = false;
+            List<string> menu = new List<string>();
+            menu.Add("Without data");
+            menu.Add("With data");
+            menu.Add("Back");
+            switch (ShowMenu("Reset config", menu))
+            {
+                case 2:
+                    data = true;
+                    break;
+
+                case 3:
+
+                    return;
+                default:
+                    break;
+            }
 
             if (data)
             {
-                Console.Write("Are you sure to clear account (Y/N)? [N]");
+                Console.Write("Are you sure to clear account? [Y/\u001b[33mN]");
                 if (Console.ReadKey().Key != ConsoleKey.Y)
                 {
                     return;
                 }
-                Console.Clear();
-                Console.WriteLine("Resetting...");
             }
+            Console.Clear();
+            Console.WriteLine("Resetting...");
 
             string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
             string appFolder = Path.Combine(appDataPath, appName);
@@ -1109,7 +1100,8 @@ namespace CheckinHoyoverse
                 {
                     Filter = "JSON Files (*.json)|*.json",
                     FilterIndex = 2,
-                    RestoreDirectory = true
+                    RestoreDirectory = true,
+                    FileName = "checkinhoyoverse.json"
                 };
 
                 if (ofd.ShowDialog() == DialogResult.OK)
@@ -1129,15 +1121,13 @@ namespace CheckinHoyoverse
                     writer.Write(JsonSerializer.Serialize(config.data));
                     writer.Close();
                     Console.WriteLine("Exported data");
-                    Console.WriteLine("\nPress any key to back...");
-                    Console.ReadKey();
                 }
             }
             else
             {
                 Console.WriteLine("Please select a file");
             }
-
+            Console.WriteLine("\nPress any key to back...");
             Console.ReadKey();
         }
 
@@ -1173,8 +1163,27 @@ namespace CheckinHoyoverse
             {
                 using (StreamReader reader = new StreamReader(path))
                 {
-                    config.data = JsonSerializer.Deserialize<List<Data>>(reader.ReadToEnd());
-                    Console.WriteLine("Imported data");
+                    try
+                    {
+                        List<Data> datas = JsonSerializer.Deserialize<List<Data>>(reader.ReadToEnd());
+                        foreach (Data dataImport in datas)
+                        {
+                            if (config.data.Exists(data => data.name.Equals(dataImport.name)))
+                            {
+                                Console.Write("Do you want to rewrite {0}? [Y/\u001b[33mN]", dataImport.name);
+                                if (Console.ReadKey().Key == ConsoleKey.Y)
+                                {
+                                    int i = config.data.FindIndex(data => data.name.Equals(dataImport.name));
+                                    config.data[i] = dataImport;
+                                }
+                                Console.WriteLine();
+                            }
+                        }
+                        Console.WriteLine("Imported data");
+                    } catch
+                    {
+                        Console.WriteLine("JSON format is not right.");
+                    }
                 }
             }
             else
@@ -1183,8 +1192,6 @@ namespace CheckinHoyoverse
             }
 
             Console.WriteLine("\nPress any key to back...");
-            Console.ReadKey();
-
             Console.ReadKey();
         }
     }
