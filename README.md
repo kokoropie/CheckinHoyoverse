@@ -1,5 +1,5 @@
 # CheckinHoyoverse
-Using cookies and api hoyoverse to checkin web (support only OS server)
+Using cookies and api hoyoverse to checkin web (support only OS server and Windows)
 # How to get cookies?
 * Copy this `alert(document.cookie)`
 * Open broswer to checkin web
