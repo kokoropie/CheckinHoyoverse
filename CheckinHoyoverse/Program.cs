@@ -830,6 +830,63 @@ namespace CheckinHoyoverse
                         }
                     }
                 }
+
+                if (data.hoyolab)
+                {
+                    using (HttpClientHandler handler = new HttpClientHandler())
+                    {
+                        handler.CookieContainer = new CookieContainer();
+                        if (cookies.Length > 0)
+                            foreach (string cookie in cookies)
+                            {
+                                string[] nameValue = cookie.Split("=");
+                                try
+                                {
+                                    handler.CookieContainer.Add(new Uri(config.url.hoyolab.sign), new Cookie(nameValue[0].Trim(), nameValue[1].Trim()));
+                                }
+                                catch { }
+                            }
+
+                        using (HttpClient client = new HttpClient(handler))
+                        {
+                            client.DefaultRequestHeaders.UserAgent.ParseAdd(config.userAgent[config.current_user_agent]);
+                            Log("- Checking HoYoLAB...", $"{logFile}.log");
+                            Log("- Checking HoYoLAB...", $"{logFile}.action.log", false);
+                            UriBuilder uriSign = new UriBuilder(config.url.hoyolab.sign);
+                            HttpContent contentSign = new StringContent("{}", Encoding.UTF8, "application/responseContentInfo");
+                            Log($"- [REQUEST:POST] {config.url.hoyolab.sign}", $"{logFile}.action.log", false);
+                            Log("- [REQUEST:POST:CONTENT] {}", $"{logFile}.action.log", false);
+                            HttpResponseMessage responseSign = await client.PostAsync(uriSign.ToString(), contentSign);
+                            if (responseSign.IsSuccessStatusCode)
+                            {
+                                string responseContentSign = await responseSign.Content.ReadAsStringAsync();
+                                Log($"- [RESPONSE] {responseContentSign}", $"{logFile}.action.log", false);
+                                HoYoLAB.SignJson signJson = JsonSerializer.Deserialize<HoYoLAB.SignJson>(responseContentSign);
+                                if (signJson.retcode == 2001)
+                                {
+                                    Log("-- You've already checked in today~", $"{logFile}.log");
+                                }
+                                else if (signJson.retcode == 0)
+                                {
+                                    Log("-- You successfully checked in today~", $"{logFile}.log");
+                                }
+                                else
+                                {
+                                    Log($"[SIGN]: {signJson.message}", $"{logFile}.log");
+                                }
+                            }
+                            else
+                            {
+                                Log($"-- HTTP request failed with status code: {responseSign.StatusCode}", $"{logFile}.log");
+                                foreach (var header in responseSign.Headers)
+                                {
+                                    Log($"-- [HEADER]: {header.Key}: {header.Value}", $"{logFile}.action.log", false);
+                                }
+                            }
+                        }
+                    }
+                }
+
                 Log("", $"{logFile}.log");
 
                 i++;
@@ -845,9 +902,9 @@ namespace CheckinHoyoverse
         {
             Console.Clear();
 
-            ConsoleTable table = new ConsoleTable($"Name ({config.data.Count})", "GI", "HI3", "HSR", "TOT");
+            ConsoleTable table = new ConsoleTable($"Name ({config.data.Count})", "GI", "HI3", "HSR", "TOT", "HoYoLAB");
             config.data.ForEach(data => {
-                table.AddRow(data.name, data.gi ? "✓" : "✗", data.hi3 ? "✓" : "✗", data.hsr ? "✓" : "✗", data.tot ? "✓" : "✗");
+                table.AddRow(data.name, data.gi ? "✓" : "✗", data.hi3 ? "✓" : "✗", data.hsr ? "✓" : "✗", data.tot ? "✓" : "✗", data.hoyolab ? "✓" : "✗");
             });
             table.Write(Format.MarkDown);
 
@@ -890,10 +947,13 @@ namespace CheckinHoyoverse
             Console.Write("\r" + new String(' ', Console.WindowWidth));
             Console.Write("\rHave Tears of Themis? [\u001b[33mY\u001b[0m/N]");
             newData.tot = Console.ReadKey().Key != ConsoleKey.N;
+            Console.Write("\r" + new String(' ', Console.WindowWidth));
+            Console.Write("\rHave HoYoLAB? [\u001b[33mY\u001b[0m/N]");
+            newData.hoyolab = Console.ReadKey().Key != ConsoleKey.N;
 
             config.data.Add(newData);
             Log($"Add account {newData.name}", $"{logFile}.action.log", false);
-            Log(newData.ToString(), $"{logFile}.action.log", false);
+            Log($"[ADD] {newData}", $"{logFile}.action.log", false);
         }
 
         static void Edit()
@@ -955,6 +1015,12 @@ namespace CheckinHoyoverse
                 ConsoleKey tot = Console.ReadKey().Key;
                 if ((tot == ConsoleKey.Y && !currentData.tot) || (tot == ConsoleKey.N && currentData.tot))
                     currentData.tot = !currentData.tot;
+
+                Console.Write("\r" + new String(' ', Console.WindowWidth));
+                Console.Write("\rHave HoYoLAB? [{0}] ", currentData.hoyolab ? "\u001b[33mY\u001b[0m/N" : "Y/\u001b[33mN\u001b[0m");
+                ConsoleKey hoyolab = Console.ReadKey().Key;
+                if ((hoyolab == ConsoleKey.Y && !currentData.hoyolab) || (hoyolab == ConsoleKey.N && currentData.hoyolab))
+                    currentData.hoyolab = !currentData.hoyolab;
 
                 Log($"[TO] {currentData}", $"{logFile}.action.log", false);
             } else {

@@ -67,6 +67,9 @@ namespace CheckinHoyoverse
         [JsonPropertyName("tot")]
         public bool tot { get; set; }
 
+        [JsonPropertyName("hoyolab")]
+        public bool hoyolab { get; set; }
+
         public Data()
         {
             name = string.Empty;
@@ -75,11 +78,12 @@ namespace CheckinHoyoverse
             hi3 = false; 
             hsr = false;
             tot = false;
+            hoyolab = false;
         }
 
         public override string ToString()
         {
-            return $"{name} | {gi} | {hi3} | {hsr} | {tot} | {cookies}";
+            return $"{name} | {gi} | {hi3} | {hsr} | {tot} | {hoyolab} | {cookies}";
         }
     }
 
@@ -97,12 +101,16 @@ namespace CheckinHoyoverse
         [JsonPropertyName("tot")]
         public Tot tot { get; set; }
 
+        [JsonPropertyName("hoyolab")]
+        public Hoyolab hoyolab { get; set; }
+
         public Url()
         {
             gi = new Gi();
             hi3 = new Hi3();
             hsr = new Hsr();
             tot = new Tot();
+            hoyolab = new Hoyolab();
         }
     }
 
@@ -195,6 +203,17 @@ namespace CheckinHoyoverse
             sign = "https://sg-public-api.hoyolab.com/event/luna/os/sign";
             home = "https://sg-public-api.hoyolab.com/event/luna/os/home";
             act_id = "e202202281857121";
+        }
+    }
+
+    public class Hoyolab
+    {
+        [JsonPropertyName("sign")]
+        public string sign { get; set; }
+
+        public Hoyolab()
+        {
+            sign = "https://bbs-api-os.hoyolab.com/community/apihub/wapi/mission/signIn";
         }
     }
 }
