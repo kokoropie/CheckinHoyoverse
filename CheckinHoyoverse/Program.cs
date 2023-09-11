@@ -34,7 +34,7 @@ namespace CheckinHoyoverse
         static readonly string logFile = $"{DateTime.Now.Year}-{DateTime.Now.Month:00}-{DateTime.Now.Day:00}";
         static readonly string key = "KagaAkatsuki0705";
         static readonly string keyStartup = $"{appName} startup";
-        static readonly string version = "1.1.1";
+        static readonly string version = "1.1.2";
         static readonly RegistryKey rk = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
 
         static ConfigJson? config = null;
