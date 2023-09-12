@@ -140,6 +140,7 @@ namespace CheckinHoyoverse
             Console.Title = "Checkin Hoyoverse";
             if (args.Contains<string>("-autorun"))
             {
+                Log($"[AUTORUN]", $"{logFile}.action.log", false);
                 IntPtr hWnd = GetConsoleWindow();
                 ShowWindow(hWnd, 0);
                 while (true)
@@ -167,6 +168,7 @@ namespace CheckinHoyoverse
                         }
                     }
                 }
+                Log($"Close app", $"{logFile}.action.log", false);
                 Environment.Exit(0);
             }
             Ping p = new Ping();
