@@ -8,7 +8,7 @@ namespace CheckinHoyoverse.GI
         public int retcode { get; set; }
 
         [JsonPropertyName("message")]
-        public string message { get; set; }
+        public string? message { get; set; }
 
         [JsonPropertyName("data")]
         public DataHome? data { get; set; }
@@ -17,10 +17,10 @@ namespace CheckinHoyoverse.GI
     public class Award
     {
         [JsonPropertyName("icon")]
-        public string icon { get; set; }
+        public string? icon { get; set; }
 
         [JsonPropertyName("name")]
-        public string name { get; set; }
+        public string? name { get; set; }
 
         [JsonPropertyName("cnt")]
         public int cnt { get; set; }
@@ -32,12 +32,12 @@ namespace CheckinHoyoverse.GI
         public int month { get; set; }
 
         [JsonPropertyName("awards")]
-        public List<Award> awards { get; set; }
+        public List<Award>? awards { get; set; }
 
         [JsonPropertyName("resign")]
         public bool resign { get; set; }
 
         [JsonPropertyName("now")]
-        public string now { get; set; }
+        public string? now { get; set; }
     }
 }

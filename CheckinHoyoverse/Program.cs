@@ -34,7 +34,7 @@ namespace CheckinHoyoverse
         static readonly string logFile = $"{DateTime.Now.Year}-{DateTime.Now.Month:00}-{DateTime.Now.Day:00}";
         static readonly string key = "KagaAkatsuki0705";
         static readonly string keyStartup = $"{appName} startup";
-        static readonly string version = "1.1.2";
+        static readonly string version = "1.1.3";
         static readonly RegistryKey rk = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
 
         static ConfigJson? config = null;
@@ -63,6 +63,7 @@ namespace CheckinHoyoverse
                 menu.Add("Reset config");
                 menu.Add("Export data");
                 menu.Add("Import data");
+                menu.Add("About");
                 menu.Add("Close");
                 menu.Add("Close (without saving)");
                 switch (option = ShowMenu("Menu", menu, option))
@@ -120,12 +121,16 @@ namespace CheckinHoyoverse
                         break;
 
                     case 14:
+                        About();
+                        break;
+
+                    case 15:
                         Save();
                         Console.WriteLine("Closing...");
                         Log($"Close app", $"{logFile}.action.log", false);
                         return;
 
-                    case 15:
+                    case 16:
                         Console.Clear();
                         Console.WriteLine("Closing...");
                         Log($"Close app without saving", $"{logFile}.action.log", false);
@@ -906,7 +911,7 @@ namespace CheckinHoyoverse
 
             ConsoleTable table = new ConsoleTable($"Name ({config.data.Count})", "GI", "HI3", "HSR", "TOT", "HoYoLAB");
             config.data.ForEach(data => {
-                table.AddRow(data.name, data.gi ? "✓" : "✗", data.hi3 ? "✓" : "✗", data.hsr ? "✓" : "✗", data.tot ? "✓" : "✗", data.hoyolab ? "✓" : "✗");
+                table.AddRow(data.name, data.gi ? "Y" : "N", data.hi3 ? "Y" : "N", data.hsr ? "Y" : "N", data.tot ? "Y" : "N", data.hoyolab ? "Y" : "N");
             });
             table.Write(Format.MarkDown);
 
@@ -1356,6 +1361,19 @@ namespace CheckinHoyoverse
             }
 
             Console.WriteLine("\nPress any key to back...");
+            Console.ReadKey();
+        }
+
+        static void About()
+        {
+            Console.Clear();
+            Console.WriteLine("------ About ------");
+            Console.WriteLine("App name: {0}", "CheckinHoyoverse");
+            Console.WriteLine("Author: \u001b[32m{0}\u001b[0m", "Kaga Akatsuki");
+            Console.WriteLine("Github: \u001b[36m{0}\u001b[0m", "https://github.com/kokoropie/CheckinHoyoverse");
+            Console.WriteLine("Version: \u001b[33mv{0}\u001b[0m", version);
+            Console.WriteLine();
+            Console.WriteLine("Press any key to continue...");
             Console.ReadKey();
         }
     }

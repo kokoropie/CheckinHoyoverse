@@ -8,10 +8,10 @@ namespace CheckinHoyoverse.GI
         public int retcode { get; set; }
 
         [JsonPropertyName("message")]
-        public string message { get; set; }
+        public string? message { get; set; }
 
         [JsonPropertyName("data")]
-        public DataInfo data { get; set; }
+        public DataInfo? data { get; set; }
     }
 
     public class DataInfo
@@ -20,7 +20,7 @@ namespace CheckinHoyoverse.GI
         public int total_sign_day { get; set; }
 
         [JsonPropertyName("today")]
-        public string today { get; set; }
+        public string? today { get; set; }
 
         [JsonPropertyName("is_sign")]
         public bool is_sign { get; set; }
@@ -32,7 +32,7 @@ namespace CheckinHoyoverse.GI
         public bool is_sub { get; set; }
 
         [JsonPropertyName("region")]
-        public string region { get; set; }
+        public string? region { get; set; }
 
         [JsonPropertyName("month_last_day")]
         public bool month_last_day { get; set; }

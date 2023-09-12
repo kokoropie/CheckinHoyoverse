@@ -8,7 +8,7 @@ namespace CheckinHoyoverse.HoYoLAB
         public int retcode { get; set; }
 
         [JsonPropertyName("message")]
-        public string message { get; set; }
+        public string? message { get; set; }
 
         [JsonPropertyName("data")]
         public object? data { get; set; }

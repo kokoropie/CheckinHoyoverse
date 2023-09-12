@@ -8,7 +8,7 @@ namespace CheckinHoyoverse.TOT
         public int retcode { get; set; }
 
         [JsonPropertyName("message")]
-        public string message { get; set; }
+        public string? message { get; set; }
 
         [JsonPropertyName("data")]
         public DataHome? data { get; set; }
@@ -17,10 +17,10 @@ namespace CheckinHoyoverse.TOT
     public class Award
     {
         [JsonPropertyName("icon")]
-        public string icon { get; set; }
+        public string? icon { get; set; }
 
         [JsonPropertyName("name")]
-        public string name { get; set; }
+        public string? name { get; set; }
 
         [JsonPropertyName("cnt")]
         public int cnt { get; set; }
@@ -32,16 +32,16 @@ namespace CheckinHoyoverse.TOT
         public int month { get; set; }
 
         [JsonPropertyName("awards")]
-        public List<Award> awards { get; set; }
+        public List<Award>? awards { get; set; }
 
         [JsonPropertyName("biz")]
-        public string biz { get; set; }
+        public string? biz { get; set; }
 
         [JsonPropertyName("resign")]
         public bool resign { get; set; }
 
         [JsonPropertyName("short_extra_award")]
-        public ShortExtraAward short_extra_award { get; set; }
+        public ShortExtraAward? short_extra_award { get; set; }
     }
 
     public class ShortExtraAward
@@ -50,18 +50,18 @@ namespace CheckinHoyoverse.TOT
         public bool has_extra_award { get; set; }
 
         [JsonPropertyName("start_time")]
-        public string start_time { get; set; }
+        public string? start_time { get; set; }
 
         [JsonPropertyName("end_time")]
-        public string end_time { get; set; }
+        public string? end_time { get; set; }
 
         [JsonPropertyName("list")]
-        public List<object> list { get; set; }
+        public List<object>? list { get; set; }
 
         [JsonPropertyName("start_timestamp")]
-        public string start_timestamp { get; set; }
+        public string? start_timestamp { get; set; }
 
         [JsonPropertyName("end_timestamp")]
-        public string end_timestamp { get; set; }
+        public string? end_timestamp { get; set; }
     }
 }

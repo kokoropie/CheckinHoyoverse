@@ -8,30 +8,30 @@ namespace CheckinHoyoverse
         public int retcode { get; set; }
 
         [JsonPropertyName("message")]
-        public string message { get; set; }
+        public string? message { get; set; }
 
         [JsonPropertyName("data")]
-        public LangsData data { get; set; }
+        public LangsData? data { get; set; }
     }
 
     public class LangsData
     {
         [JsonPropertyName("langs")]
-        public List<Lang> langs { get; set; }
+        public List<Lang>? langs { get; set; }
     }
 
     public class Lang
     {
         [JsonPropertyName("name")]
-        public string name { get; set; }
+        public string? name { get; set; }
 
         [JsonPropertyName("value")]
-        public string value { get; set; }
+        public string? value { get; set; }
 
         [JsonPropertyName("label")]
-        public string label { get; set; }
+        public string? label { get; set; }
 
         [JsonPropertyName("alias")]
-        public List<string> alias { get; set; }
+        public List<string>? alias { get; set; }
     }
 }
