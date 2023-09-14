@@ -3,7 +3,7 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace CheckinHoyoverse
+namespace CheckinHoyoverse.Libs
 {
     internal static class AES
     {
