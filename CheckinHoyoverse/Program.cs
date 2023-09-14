@@ -1,4 +1,6 @@
-﻿using ConsoleTables;
+﻿using CheckinHoyoverse.JSON;
+using CheckinHoyoverse.Libs;
+using ConsoleTables;
 using Microsoft.Win32;
 using System.Diagnostics;
 using System.Net;
@@ -417,7 +419,7 @@ namespace CheckinHoyoverse
                             {
                                 string responseContentInfo = await responseInfo.Content.ReadAsStringAsync();
                                 Log($"- [RESPONSE] {responseContentInfo}", $"{logFile}.action.log", false);
-                                GI.InfoJson infoJson = JsonSerializer.Deserialize<GI.InfoJson>(responseContentInfo);
+                                JSON.GI.InfoJson infoJson = JsonSerializer.Deserialize<JSON.GI.InfoJson>(responseContentInfo);
                                 if (infoJson.retcode == 0)
                                 {
                                     if (infoJson.data.is_sign)
@@ -432,7 +434,7 @@ namespace CheckinHoyoverse
                                         HttpResponseMessage responseHome = await client.GetAsync(uriHome.ToString());
                                         string responseContentHome = await responseHome.Content.ReadAsStringAsync();
                                         Log($"- [RESPONSE] {responseContentHome}", $"{logFile}.action.log", false);
-                                        GI.HomeJson homeJson = JsonSerializer.Deserialize<GI.HomeJson>(responseContentHome);
+                                        JSON.GI.HomeJson homeJson = JsonSerializer.Deserialize<JSON.GI.HomeJson>(responseContentHome);
 
                                         UriBuilder uriSign = new UriBuilder(config.url.gi.sign);
                                         uriSign.Query = String.Format("lang={0}", config.lang);
@@ -445,7 +447,7 @@ namespace CheckinHoyoverse
                                         {
                                             string responseContentSign = await responseSign.Content.ReadAsStringAsync();
                                             Log($"- [RESPONSE] {responseContentSign}", $"{logFile}.action.log", false);
-                                            GI.SignJson signJson = JsonSerializer.Deserialize<GI.SignJson>(responseContentSign);
+                                            JSON.GI.SignJson signJson = JsonSerializer.Deserialize<JSON.GI.SignJson>(responseContentSign);
                                             if (signJson.retcode != 0)
                                             {
                                                 Log($"[SIGN]: {signJson.message}", $"{logFile}.log");
@@ -533,7 +535,7 @@ namespace CheckinHoyoverse
                             {
                                 string json = await responseInfo.Content.ReadAsStringAsync();
                                 Log($"- [RESPONSE] {json}", $"{logFile}.action.log", false);
-                                HI3.InfoJson infoJson = JsonSerializer.Deserialize<HI3.InfoJson>(json);
+                                JSON.HI3.InfoJson infoJson = JsonSerializer.Deserialize<JSON.HI3.InfoJson>(json);
                                 if (infoJson.retcode == 0)
                                 {
                                     if (infoJson.data.is_sign)
@@ -548,7 +550,7 @@ namespace CheckinHoyoverse
                                         HttpResponseMessage responseHome = await client.GetAsync(uriHome.ToString());
                                         string responseContentHome = await responseHome.Content.ReadAsStringAsync();
                                         Log($"- [RESPONSE] {responseContentHome}", $"{logFile}.action.log", false);
-                                        HI3.HomeJson homeJson = JsonSerializer.Deserialize<HI3.HomeJson>(responseContentHome);
+                                        JSON.HI3.HomeJson homeJson = JsonSerializer.Deserialize<JSON.HI3.HomeJson>(responseContentHome);
 
                                         UriBuilder uriSign = new UriBuilder(config.url.hi3.sign);
                                         uriSign.Query = String.Format("lang={0}", config.lang);
@@ -561,7 +563,7 @@ namespace CheckinHoyoverse
                                         {
                                             string responseContentSign = await responseSign.Content.ReadAsStringAsync();
                                             Log($"- [RESPONSE] {responseContentSign}", $"{logFile}.action.log", false);
-                                            HI3.SignJson signJson = JsonSerializer.Deserialize<HI3.SignJson>(responseContentSign);
+                                            JSON.HI3.SignJson signJson = JsonSerializer.Deserialize<JSON.HI3.SignJson>(responseContentSign);
                                             if (signJson.retcode != 0)
                                             {
                                                 Log($"[SIGN]: {signJson.message}", $"{logFile}.log");
@@ -645,7 +647,7 @@ namespace CheckinHoyoverse
                             {
                                 string json = await responseInfo.Content.ReadAsStringAsync();
                                 Log($"- [RESPONSE] {json}", $"{logFile}.action.log", false);
-                                HSR.InfoJson infoJson = JsonSerializer.Deserialize<HSR.InfoJson>(json);
+                                JSON.HSR.InfoJson infoJson = JsonSerializer.Deserialize<JSON.HSR.InfoJson>(json);
                                 if (infoJson.retcode == 0)
                                 {
                                     if (infoJson.data.is_sign)
@@ -660,7 +662,7 @@ namespace CheckinHoyoverse
                                         HttpResponseMessage responseHome = await client.GetAsync(uriHome.ToString());
                                         string responseContentHome = await responseHome.Content.ReadAsStringAsync();
                                         Log($"- [RESPONSE] {responseContentHome}", $"{logFile}.action.log", false);
-                                        HSR.HomeJson homeJson = JsonSerializer.Deserialize<HSR.HomeJson>(responseContentHome);
+                                        JSON.HSR.HomeJson homeJson = JsonSerializer.Deserialize<JSON.HSR.HomeJson>(responseContentHome);
 
                                         UriBuilder uriSign = new UriBuilder(config.url.hsr.sign);
                                         uriSign.Query = String.Format("lang={0}", config.lang);
@@ -673,7 +675,7 @@ namespace CheckinHoyoverse
                                         {
                                             string responseContentSign = await responseSign.Content.ReadAsStringAsync();
                                             Log($"- [RESPONSE] {responseContentSign}", $"{logFile}.action.log", false);
-                                            HSR.SignJson signJson = JsonSerializer.Deserialize<HSR.SignJson>(responseContentSign);
+                                            JSON.HSR.SignJson signJson = JsonSerializer.Deserialize<JSON.HSR.SignJson>(responseContentSign);
                                             if (signJson.retcode != 0)
                                             {
                                                 Log($"[SIGN]: {signJson.message}", $"{logFile}.log");
@@ -757,7 +759,7 @@ namespace CheckinHoyoverse
                             {
                                 string json = await responseInfo.Content.ReadAsStringAsync();
                                 Log($"- [RESPONSE] {json}", $"{logFile}.action.log", false);
-                                TOT.InfoJson infoJson = JsonSerializer.Deserialize<TOT.InfoJson>(json);
+                                JSON.TOT.InfoJson infoJson = JsonSerializer.Deserialize<JSON.TOT.InfoJson>(json);
                                 if (infoJson.retcode == 0)
                                 {
                                     if (infoJson.data.is_sign)
@@ -772,7 +774,7 @@ namespace CheckinHoyoverse
                                         HttpResponseMessage responseHome = await client.GetAsync(uriHome.ToString());
                                         string responseContentHome = await responseHome.Content.ReadAsStringAsync();
                                         Log($"- [RESPONSE] {responseContentHome}", $"{logFile}.action.log", false);
-                                        TOT.HomeJson homeJson = JsonSerializer.Deserialize<TOT.HomeJson>(responseContentHome);
+                                        JSON.TOT.HomeJson homeJson = JsonSerializer.Deserialize<JSON.TOT.HomeJson>(responseContentHome);
 
                                         UriBuilder uriSign = new UriBuilder(config.url.tot.sign);
                                         uriSign.Query = String.Format("lang={0}", config.lang);
@@ -785,7 +787,7 @@ namespace CheckinHoyoverse
                                         {
                                             string responseContentSign = await responseSign.Content.ReadAsStringAsync();
                                             Log($"- [RESPONSE] {responseContentSign}", $"{logFile}.action.log", false);
-                                            TOT.SignJson signJson = JsonSerializer.Deserialize<TOT.SignJson>(responseContentSign);
+                                            JSON.TOT.SignJson signJson = JsonSerializer.Deserialize<JSON.TOT.SignJson>(responseContentSign);
                                             if (signJson.retcode != 0)
                                             {
                                                 Log($"[SIGN]: {signJson.message}", $"{logFile}.log");
@@ -868,7 +870,7 @@ namespace CheckinHoyoverse
                             {
                                 string responseContentSign = await responseSign.Content.ReadAsStringAsync();
                                 Log($"- [RESPONSE] {responseContentSign}", $"{logFile}.action.log", false);
-                                HoYoLAB.SignJson signJson = JsonSerializer.Deserialize<HoYoLAB.SignJson>(responseContentSign);
+                                JSON.HoYoLAB.SignJson signJson = JsonSerializer.Deserialize<JSON.HoYoLAB.SignJson>(responseContentSign);
                                 if (signJson.retcode == 2001)
                                 {
                                     Log("-- You've already checked in today~", $"{logFile}.log");
