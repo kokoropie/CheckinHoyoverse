@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text.Json.Serialization;
 
-namespace CheckinHoyoverse
+namespace CheckinHoyoverse.JSON
 {
     public class ConfigJson
     {
@@ -26,7 +26,8 @@ namespace CheckinHoyoverse
         [JsonPropertyName("api_lang")]
         public string api_lang { get; set; }
 
-        public ConfigJson() {
+        public ConfigJson()
+        {
             data = new List<Data>();
             version = string.Empty;
             url = new Url();
@@ -74,8 +75,8 @@ namespace CheckinHoyoverse
         {
             name = string.Empty;
             cookies = string.Empty;
-            gi = false; 
-            hi3 = false; 
+            gi = false;
+            hi3 = false;
             hsr = false;
             tot = false;
             hoyolab = false;

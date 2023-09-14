@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace CheckinHoyoverse.TOT
+namespace CheckinHoyoverse.JSON.HSR
 {
     public class SignJson
     {

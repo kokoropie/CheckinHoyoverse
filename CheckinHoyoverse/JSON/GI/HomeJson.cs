@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace CheckinHoyoverse.TOT
+namespace CheckinHoyoverse.JSON.GI
 {
     public class HomeJson
     {
@@ -34,34 +34,10 @@ namespace CheckinHoyoverse.TOT
         [JsonPropertyName("awards")]
         public List<Award>? awards { get; set; }
 
-        [JsonPropertyName("biz")]
-        public string? biz { get; set; }
-
         [JsonPropertyName("resign")]
         public bool resign { get; set; }
 
-        [JsonPropertyName("short_extra_award")]
-        public ShortExtraAward? short_extra_award { get; set; }
-    }
-
-    public class ShortExtraAward
-    {
-        [JsonPropertyName("has_extra_award")]
-        public bool has_extra_award { get; set; }
-
-        [JsonPropertyName("start_time")]
-        public string? start_time { get; set; }
-
-        [JsonPropertyName("end_time")]
-        public string? end_time { get; set; }
-
-        [JsonPropertyName("list")]
-        public List<object>? list { get; set; }
-
-        [JsonPropertyName("start_timestamp")]
-        public string? start_timestamp { get; set; }
-
-        [JsonPropertyName("end_timestamp")]
-        public string? end_timestamp { get; set; }
+        [JsonPropertyName("now")]
+        public string? now { get; set; }
     }
 }

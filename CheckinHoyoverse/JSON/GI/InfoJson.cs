@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace CheckinHoyoverse.HI3
+namespace CheckinHoyoverse.JSON.GI
 {
     public class InfoJson
     {
@@ -33,5 +33,8 @@ namespace CheckinHoyoverse.HI3
 
         [JsonPropertyName("region")]
         public string? region { get; set; }
+
+        [JsonPropertyName("month_last_day")]
+        public bool month_last_day { get; set; }
     }
 }

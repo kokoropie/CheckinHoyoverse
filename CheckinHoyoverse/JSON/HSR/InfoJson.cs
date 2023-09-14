@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace CheckinHoyoverse.GI
+namespace CheckinHoyoverse.JSON.HSR
 {
     public class InfoJson
     {
@@ -25,16 +25,16 @@ namespace CheckinHoyoverse.GI
         [JsonPropertyName("is_sign")]
         public bool is_sign { get; set; }
 
-        [JsonPropertyName("first_bind")]
-        public bool first_bind { get; set; }
-
         [JsonPropertyName("is_sub")]
         public bool is_sub { get; set; }
 
         [JsonPropertyName("region")]
         public string? region { get; set; }
 
-        [JsonPropertyName("month_last_day")]
-        public bool month_last_day { get; set; }
+        [JsonPropertyName("sign_cnt_missed")]
+        public int sign_cnt_missed { get; set; }
+
+        [JsonPropertyName("short_sign_day")]
+        public int short_sign_day { get; set; }
     }
 }

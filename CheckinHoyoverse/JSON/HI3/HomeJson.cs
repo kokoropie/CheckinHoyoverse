@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace CheckinHoyoverse.HI3
+namespace CheckinHoyoverse.JSON.HI3
 {
     public class HomeJson
     {
