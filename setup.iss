@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "CheckinHoyoverse"
-#define MyAppVersion "1.1.3"
+#define MyAppVersion "1.1.4"
 #define MyAppPublisher "Kaga Akatsuki"
 #define MyAppExeName "CheckinHoyoverse.exe"
 #define MyAppAssocName MyAppName + " File"

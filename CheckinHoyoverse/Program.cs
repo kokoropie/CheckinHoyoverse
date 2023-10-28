@@ -1,6 +1,7 @@
 ﻿using CheckinHoyoverse.JSON;
 using CheckinHoyoverse.Libs;
 using ConsoleTables;
+using Microsoft.Toolkit.Uwp.Notifications;
 using Microsoft.Win32;
 using System.Diagnostics;
 using System.Net;
@@ -8,6 +9,7 @@ using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
+using Windows.UI.Notifications;
 
 namespace CheckinHoyoverse
 {
@@ -36,7 +38,8 @@ namespace CheckinHoyoverse
         static readonly string logFile = $"{DateTime.Now.Year}-{DateTime.Now.Month:00}-{DateTime.Now.Day:00}";
         static readonly string key = "KagaAkatsuki0705";
         static readonly string keyStartup = $"{appName} startup";
-        static readonly string version = "1.1.3";
+        static readonly string guid = "BBEA5626-CA2E-4676-8667-C6900E59686C";
+        static readonly string version = "1.1.4";
         static readonly RegistryKey rk = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
 
         static ConfigJson? config = null;
@@ -48,26 +51,18 @@ namespace CheckinHoyoverse
 
             Console.Clear();
             List<string> menu = new List<string>();
+            menu.Add("Checkin");
+            menu.Add("Account");
+            menu.Add("Data");
+            menu.Add("Config");
+            menu.Add($"Show log {logFile}");
+            menu.Add("Show log folder");
+            menu.Add("About");
+            menu.Add("Close");
+            menu.Add("Close (without saving)");
             int option = 1;
             while (true)
             {
-                menu.Clear();
-                menu.Add("Checkin");
-                menu.Add("List account");
-                menu.Add("Add account");
-                menu.Add("Edit account");
-                menu.Add("Remove account");
-                menu.Add(string.Format("{0} check in when start with windows", isStartup ? "Disable" : "Enable"));
-                menu.Add($"Show log {logFile}");
-                menu.Add("Show log folder");
-                menu.Add("Clear log");
-                menu.Add($"Change language check in ({config.lang})");
-                menu.Add("Reset config");
-                menu.Add("Export data");
-                menu.Add("Import data");
-                menu.Add("About");
-                menu.Add("Close");
-                menu.Add("Close (without saving)");
                 switch (option = ShowMenu("Menu", menu, option))
                 {
                     case 1:
@@ -75,64 +70,36 @@ namespace CheckinHoyoverse
                         break;
 
                     case 2:
-                        List();
+                        AccountOption();
                         break;
 
                     case 3:
-                        Add();
+                        DataOption();
                         break;
 
                     case 4:
-                        Edit();
+                        await ConfigOption();
                         break;
 
                     case 5:
-                        Remove();
-                        break;
-
-                    case 6:
-                        Startup();
-                        break;
-
-                    case 7:
                         ShowLog();
                         break;
 
-                    case 8:
+                    case 6:
                         ShowLogFolder();
                         break;
 
-                    case 9:
-                        ClearLog();
-                        break;
-
-                    case 10:
-                        await ChangeLanguage();
-                        break;
-
-                    case 11:
-                        Reset();
-                        break;
-
-                    case 12:
-                        ExportData();
-                        break;
-
-                    case 13:
-                        ImportData();
-                        break;
-
-                    case 14:
+                    case 7:
                         About();
                         break;
 
-                    case 15:
+                    case 8:
                         Save();
                         Console.WriteLine("Closing...");
                         Log($"Close app", $"{logFile}.action.log", false);
                         return;
 
-                    case 16:
+                    case 9:
                         Console.Clear();
                         Console.WriteLine("Closing...");
                         Log($"Close app without saving", $"{logFile}.action.log", false);
@@ -145,6 +112,7 @@ namespace CheckinHoyoverse
         {
             Log($"Start app", $"{logFile}.action.log", false);
             Console.Title = "Checkin Hoyoverse";
+            
             if (args.Contains<string>("-autorun"))
             {
                 Log($"[AUTORUN]", $"{logFile}.action.log", false);
@@ -254,11 +222,10 @@ namespace CheckinHoyoverse
                         string json = AES.Decrypt(Convert.FromBase64String(encoded), key);
                         config = JsonSerializer.Deserialize<ConfigJson>(json);
                         reader.Close();
-                        config.current_user_agent = new Random().Next(0, config.userAgent.Count - 1);
                         if (config.version != version)
                         {
                             string currentLang = config.lang;
-                            Reset(false);
+                            ResetConfig(false);
                             config.lang = currentLang;
                         }
                     }
@@ -357,6 +324,25 @@ namespace CheckinHoyoverse
             }
         }
 
+        static void NotificationText(string strValue, string action)
+        {
+            Notification(strValue, action, "text");
+        }
+
+        static void Notification(string strValue, string action, string type)
+        {
+            if (config.notification)
+            {
+                if (type.Equals("text"))
+                {
+                    new ToastContentBuilder()
+                           .AddArgument("action", action)
+                           .AddText(strValue)
+                           .Show();
+                }
+            }
+        }
+
         static bool Handler(CtrlType signal)
         {
             switch (signal)
@@ -377,13 +363,80 @@ namespace CheckinHoyoverse
             }
         }
 
+        static void AccountOption()
+        {
+            Console.Clear();
+            List<string> menu = new List<string>();
+            menu.Add("List account");
+            menu.Add("Add account");
+            menu.Add("Edit account");
+            menu.Add("Remove account");
+            menu.Add("Back");
+            int option = 1;
+            while (true)
+            {
+                switch (option = ShowMenu("Account", menu, option))
+                {
+                    case 1:
+                        List();
+                        break;
+
+                    case 2:
+                        Add();
+                        break;
+
+                    case 3:
+                        Edit();
+                        break;
+
+                    case 4:
+                        Remove();
+                        break;
+
+                    case 5:
+                        return;
+                }
+            }
+        }
+
         static async Task Checkin(bool readKey = true)
         {
             Console.Clear();
             Console.WriteLine("------ Checkin ------");
-            int i = 1;
+            uint i = 1;
+
+            //if (config.notification)
+            //{
+            //    new ToastContentBuilder()
+            //        .AddText("Checking HoYoVerse account")
+            //        .AddVisualChild(new AdaptiveProgressBar()
+            //        {
+            //            Value = new BindableProgressBarValue("progressValue"),
+            //            ValueStringOverride = new BindableString("progressValueString"),
+            //            Status = new BindableString("progressStatus")
+            //        })
+            //        .Show(toast =>
+            //        {
+            //            toast.Tag = "checkin-account";
+            //            toast.Group = "checking";
+            //            toast.Data = new NotificationData();
+            //            toast.Data.Values["progressValue"] = "0";
+            //            toast.Data.Values["progressValueString"] = $"0/{config.data.Count} accounts";
+            //            toast.Data.Values["progressStatus"] = "Checking...";
+            //            toast.Data.SequenceNumber = 0;
+            //        });
+            //}
+
             foreach (Data data in config.data)
             {
+                //NotificationData toastData = new NotificationData();
+
+                //toastData.SequenceNumber = i;
+                //toastData.Values["progressValue"] = $"{i * 1f / config.data.Count}";
+                //toastData.Values["progressValueString"] = $"{i}/{config.data.Count} accounts";
+
+                //ToastNotificationManager.CreateToastNotifier(guid).Update(toastData, "checkin-account", "checking");
+
                 Log($"{i}. Start checking {data.name}", $"{logFile}.log");
                 Log($"{i}. Start checking {data.name}", $"{logFile}.action.log", false);
                 string[] cookies = data.cookies.Split(";");
@@ -456,6 +509,7 @@ namespace CheckinHoyoverse
                                             {
                                                 if (signJson.data != null && signJson.data.gt_result.is_risk)
                                                 {
+                                                    NotificationText($"Your account has risk {data.name} - GI.", "error");
                                                     Log("-- [RISK]: It's risk. Please check in by yourself, Traveler. You must to pass the challenge.", $"{logFile}.log");
                                                     foreach (var header in responseSign.Headers)
                                                     {
@@ -474,6 +528,7 @@ namespace CheckinHoyoverse
                                         }
                                         else
                                         {
+                                            NotificationText($"Had some error while checking {data.name} - GI.", "error");
                                             Log($"-- HTTP request failed with status code: {responseSign.StatusCode}", $"{logFile}.log");
                                             foreach (var header in responseSign.Headers)
                                             {
@@ -586,6 +641,7 @@ namespace CheckinHoyoverse
                                         }
                                         else
                                         {
+                                            NotificationText($"Had some error while checking {data.name} - HI3.", "error");
                                             Log($"-- HTTP request failed with status code: {responseSign.StatusCode}", $"{logFile}.log");
                                             foreach (var header in responseSign.Headers)
                                             {
@@ -698,6 +754,7 @@ namespace CheckinHoyoverse
                                         }
                                         else
                                         {
+                                            NotificationText($"Had some error while checking {data.name} - HSR.", "error");
                                             Log($"-- HTTP request failed with status code: {responseSign.StatusCode}", $"{logFile}.log");
                                             foreach (var header in responseSign.Headers)
                                             {
@@ -810,6 +867,7 @@ namespace CheckinHoyoverse
                                         }
                                         else
                                         {
+                                            NotificationText($"Had some error while checking {data.name} - TOT.", "error");
                                             Log($"-- HTTP request failed with status code: {responseSign.StatusCode}", $"{logFile}.log");
                                             foreach (var header in responseSign.Headers)
                                             {
@@ -886,6 +944,8 @@ namespace CheckinHoyoverse
                             }
                             else
                             {
+                                NotificationText($"Had some error while checking {data.name} - HoYoLAB.", "error");
+
                                 Log($"-- HTTP request failed with status code: {responseSign.StatusCode}", $"{logFile}.log");
                                 foreach (var header in responseSign.Headers)
                                 {
@@ -899,9 +959,15 @@ namespace CheckinHoyoverse
                 Log("", $"{logFile}.log");
 
                 i++;
+
+                Thread.Sleep(1000);
             }
 
             Log("-------------------------------------", $"{logFile}.log");
+
+            ToastNotificationManagerCompat.History.Clear();
+
+            NotificationText("Checking all account succeed.", "success");
 
             Console.WriteLine("\nPress any key to back...");
             if (readKey) Console.ReadKey();
@@ -1073,60 +1139,184 @@ namespace CheckinHoyoverse
             }
         }
 
-        static void Startup()
+        static void DataOption()
         {
             Console.Clear();
-            isStartup = !isStartup;
-            Log(String.Format("{0} startup", isStartup ? "Enable" : "Disable"), $"{logFile}.action.log", false);
-            if (isStartup) rk.SetValue(keyStartup, $"\"{Environment.ProcessPath}\" -autorun");
-            else rk.DeleteValue(keyStartup, false);
+            List<string> menu = new List<string>();
+            menu.Add("Export Data");
+            menu.Add("Import Data");
+            menu.Add("Back");
+            int option = 1;
+            while (true)
+            {
+                switch (option = ShowMenu("Data", menu, option))
+                {
+
+                    case 1:
+                        ExportData();
+                        break;
+
+                    case 2:
+                        ImportData();
+                        break;
+
+                    case 3:
+                        return;
+                }
+            }
         }
 
-        static void ShowLog()
-        {
-            string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            string appFolder = Path.Combine(appDataPath, appName);
-            string logFolderPath = Path.Combine(appFolder, logFolder);
-            string logFilePath = Path.Combine(logFolderPath, $"{logFile}.log");
-            if (!Directory.Exists(logFolderPath))
-            {
-                Directory.CreateDirectory(logFolderPath);
-            }
-            if (!File.Exists(logFilePath))
-            {
-                File.CreateText(logFilePath).Close();
-            }
-            Process.Start("explorer", logFilePath);
-        }
-
-        static void ClearLog()
+        static void ExportData()
         {
             Console.Clear();
-            Console.WriteLine("Clearing log...");
-            string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            string appFolder = Path.Combine(appDataPath, appName);
-            string logFolderPath = Path.Combine(appFolder, logFolder);
-            if (Directory.Exists(logFolderPath))
+            Console.WriteLine("------ Export Data ------");
+
+            Console.WriteLine("Selecting path...");
+
+            string path = String.Empty;
+
+            Thread t = new Thread((ThreadStart)(() =>
             {
-                DirectoryInfo di = new DirectoryInfo(logFolderPath);
-                di.Delete(true);
-                di.Create();
+                SaveFileDialog ofd = new SaveFileDialog
+                {
+                    Filter = "JSON Files (*.json)|*.json",
+                    FilterIndex = 2,
+                    RestoreDirectory = true,
+                    FileName = "checkinhoyoverse.json"
+                };
+
+                if (ofd.ShowDialog() == DialogResult.OK)
+                {
+                    path = ofd.FileName;
+                }
+            }));
+
+            t.SetApartmentState(ApartmentState.STA);
+            t.Start();
+            t.Join();
+
+            if (!path.Equals(String.Empty))
+            {
+                using (StreamWriter writer = new StreamWriter(path))
+                {
+                    writer.Write(JsonSerializer.Serialize(config.data));
+                    writer.Close();
+                    Console.WriteLine("Exported data");
+                }
             }
-            Console.WriteLine("Succeed!");
-            Console.WriteLine("Press any key to continue...");
+            else
+            {
+                Console.WriteLine("Please select a file");
+            }
+            Console.WriteLine("\nPress any key to back...");
             Console.ReadKey();
         }
 
-        static void ShowLogFolder()
+        static void ImportData()
         {
-            string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            string appFolder = Path.Combine(appDataPath, appName);
-            string logFolderPath = Path.Combine(appFolder, logFolder);
-            if (!Directory.Exists(logFolderPath))
+            Console.Clear();
+            Console.WriteLine("------ Import Data ------");
+
+            Console.WriteLine("Selecting path...");
+
+            string path = String.Empty;
+
+            Thread t = new Thread((ThreadStart)(() =>
             {
-                Directory.CreateDirectory(logFolderPath);
+                OpenFileDialog ofd = new OpenFileDialog
+                {
+                    Filter = "JSON Files (*.json)|*.json",
+                    FilterIndex = 2,
+                    RestoreDirectory = true
+                };
+
+                if (ofd.ShowDialog() == DialogResult.OK)
+                {
+                    path = ofd.FileName;
+                }
+            }));
+
+            t.SetApartmentState(ApartmentState.STA);
+            t.Start();
+            t.Join();
+
+            if (!path.Equals(String.Empty))
+            {
+                using (StreamReader reader = new StreamReader(path))
+                {
+                    try
+                    {
+                        List<Data> datas = JsonSerializer.Deserialize<List<Data>>(reader.ReadToEnd());
+                        foreach (Data dataImport in datas)
+                        {
+                            if (config.data.Exists(data => data.name.Equals(dataImport.name)))
+                            {
+                                Console.Write("Do you want to rewrite {0}? [Y/\u001b[33mN]", dataImport.name);
+                                if (Console.ReadKey().Key == ConsoleKey.Y)
+                                {
+                                    int i = config.data.FindIndex(data => data.name.Equals(dataImport.name));
+                                    config.data[i] = dataImport;
+                                }
+                                Console.WriteLine();
+                            }
+                        }
+                        Console.WriteLine("Imported data");
+                    }
+                    catch
+                    {
+                        Console.WriteLine("JSON format is not right.");
+                    }
+                }
             }
-            Process.Start("explorer", logFolderPath);
+            else
+            {
+                Console.WriteLine("Please select a file");
+            }
+
+            Console.WriteLine("\nPress any key to back...");
+            Console.ReadKey();
+        }
+
+        static async Task ConfigOption()
+        {
+            Console.Clear();
+            List<string> menu = new List<string>();
+            int option = 1;
+            while (true)
+            {
+                menu.Clear();
+                menu.Add($"Change language check in ({config.lang})");
+                menu.Add(string.Format("{0} notification", config.notification ? "Disable" : "Enable"));
+                menu.Add(string.Format("{0} check in when start with windows", isStartup ? "Disable" : "Enable"));
+                menu.Add("Clear log");
+                menu.Add("Reset config");
+                menu.Add("Back");
+                switch (option = ShowMenu("Account", menu, option))
+                {
+                    case 1:
+                        await ChangeLanguage();
+                        break;
+
+                    case 2:
+                        ChangeNotification();
+                        break;
+
+                    case 3:
+                        ChangeStartup();
+                        break;
+
+                    case 4:
+                        ClearLog();
+                        break;
+
+                    case 5:
+                        ResetConfig();
+                        break;
+
+                    case 6:
+                        return;
+                }
+            }
         }
 
         static async Task ChangeLanguage()
@@ -1178,12 +1368,45 @@ namespace CheckinHoyoverse
             }
         }
 
-        static void Reset()
+        static void ChangeNotification()
         {
-            Reset(true);
+            Console.Clear();
+            config.notification = !config.notification;
         }
 
-        static void Reset(bool console)
+        static void ChangeStartup()
+        {
+            Console.Clear();
+            isStartup = !isStartup;
+            Log(String.Format("{0} startup", isStartup ? "Enable" : "Disable"), $"{logFile}.action.log", false);
+            if (isStartup) rk.SetValue(keyStartup, $"\"{Environment.ProcessPath}\" -autorun");
+            else rk.DeleteValue(keyStartup, false);
+        }
+
+        static void ClearLog()
+        {
+            Console.Clear();
+            Console.WriteLine("Clearing log...");
+            string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            string appFolder = Path.Combine(appDataPath, appName);
+            string logFolderPath = Path.Combine(appFolder, logFolder);
+            if (Directory.Exists(logFolderPath))
+            {
+                DirectoryInfo di = new DirectoryInfo(logFolderPath);
+                di.Delete(true);
+                di.Create();
+            }
+            Console.WriteLine("Succeed!");
+            Console.WriteLine("Press any key to continue...");
+            Console.ReadKey();
+        }
+
+        static void ResetConfig()
+        {
+            ResetConfig(true);
+        }
+
+        static void ResetConfig(bool console)
         {
             bool data = false;
             if (console)
@@ -1256,118 +1479,52 @@ namespace CheckinHoyoverse
             }
         }
 
-        static void ExportData()
+        static void ShowLog()
         {
-            Console.Clear();
-            Console.WriteLine("------ Export Data ------");
-
-            Console.WriteLine("Selecting path...");
-
-            string path = String.Empty;
-
-            Thread t = new Thread((ThreadStart)(() =>
+            string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            string appFolder = Path.Combine(appDataPath, appName);
+            string logFolderPath = Path.Combine(appFolder, logFolder);
+            string logFilePath = Path.Combine(logFolderPath, $"{logFile}.log");
+            if (!Directory.Exists(logFolderPath))
             {
-                SaveFileDialog ofd = new SaveFileDialog
-                {
-                    Filter = "JSON Files (*.json)|*.json",
-                    FilterIndex = 2,
-                    RestoreDirectory = true,
-                    FileName = "checkinhoyoverse.json"
-                };
-
-                if (ofd.ShowDialog() == DialogResult.OK)
-                {
-                    path = ofd.FileName;
-                }
-            }));
-
-            t.SetApartmentState(ApartmentState.STA);
-            t.Start();
-            t.Join();
-
-            if (!path.Equals(String.Empty))
-            {
-                using (StreamWriter writer = new StreamWriter(path))
-                {
-                    writer.Write(JsonSerializer.Serialize(config.data));
-                    writer.Close();
-                    Console.WriteLine("Exported data");
-                }
+                Directory.CreateDirectory(logFolderPath);
             }
-            else
+            if (!File.Exists(logFilePath))
             {
-                Console.WriteLine("Please select a file");
+                File.CreateText(logFilePath).Close();
             }
-            Console.WriteLine("\nPress any key to back...");
-            Console.ReadKey();
+            Process.Start("explorer", logFilePath);
         }
 
-        static void ImportData()
+        static void ShowLogFolder()
         {
-            Console.Clear();
-            Console.WriteLine("------ Import Data ------");
-
-            Console.WriteLine("Selecting path...");
-
-            string path = String.Empty;
-
-            Thread t = new Thread((ThreadStart) (() =>
+            string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            string appFolder = Path.Combine(appDataPath, appName);
+            string logFolderPath = Path.Combine(appFolder, logFolder);
+            if (!Directory.Exists(logFolderPath))
             {
-                OpenFileDialog ofd = new OpenFileDialog
-                {
-                    Filter = "JSON Files (*.json)|*.json",
-                    FilterIndex = 2,
-                    RestoreDirectory = true
-                };
-
-                if (ofd.ShowDialog() == DialogResult.OK)
-                {
-                    path = ofd.FileName;
-                }
-            }));
-
-            t.SetApartmentState(ApartmentState.STA);
-            t.Start();
-            t.Join();
-
-            if (!path.Equals(String.Empty))
-            {
-                using (StreamReader reader = new StreamReader(path))
-                {
-                    try
-                    {
-                        List<Data> datas = JsonSerializer.Deserialize<List<Data>>(reader.ReadToEnd());
-                        foreach (Data dataImport in datas)
-                        {
-                            if (config.data.Exists(data => data.name.Equals(dataImport.name)))
-                            {
-                                Console.Write("Do you want to rewrite {0}? [Y/\u001b[33mN]", dataImport.name);
-                                if (Console.ReadKey().Key == ConsoleKey.Y)
-                                {
-                                    int i = config.data.FindIndex(data => data.name.Equals(dataImport.name));
-                                    config.data[i] = dataImport;
-                                }
-                                Console.WriteLine();
-                            }
-                        }
-                        Console.WriteLine("Imported data");
-                    } catch
-                    {
-                        Console.WriteLine("JSON format is not right.");
-                    }
-                }
+                Directory.CreateDirectory(logFolderPath);
             }
-            else
-            {
-                Console.WriteLine("Please select a file");
-            }
-
-            Console.WriteLine("\nPress any key to back...");
-            Console.ReadKey();
+            Process.Start("explorer", logFolderPath);
         }
 
         static void About()
         {
+            //NotificationData toastUpdate = new NotificationData();
+            //toastUpdate.SequenceNumber = 1;
+            //toastUpdate.Values["progressValueString"] = $"1/{config.data.Count} accounts";
+            //ToastNotificationManager.CreateToastNotifier(guid).Update(toastUpdate, "checkin-account", "checking");
+
+            //ToastNotification toast = new ToastNotification(toastContent.GetXml());
+            //toast.Tag = "checkin-account";
+            //toast.Group = "checking";
+            //toast.Data = new NotificationData();
+            //toast.Data.Values["progressValue"] = "0";
+            //toast.Data.Values["progressValueString"] = $"0/{config.data.Count} accounts";
+            //toast.Data.Values["progressStatus"] = "Checking...";
+            //toast.Data.SequenceNumber = 0;
+            //ToastNotificationManager.CreateToastNotifier(guid).Show(toast);
+
             Console.Clear();
             Console.WriteLine("------ About ------");
             Console.WriteLine("App name: {0}", "CheckinHoyoverse");

@@ -26,6 +26,9 @@ namespace CheckinHoyoverse.JSON
         [JsonPropertyName("api_lang")]
         public string api_lang { get; set; }
 
+        [JsonPropertyName("enable_notification")]
+        public bool notification {  get; set; }
+
         public ConfigJson()
         {
             data = new List<Data>();
@@ -42,9 +45,10 @@ namespace CheckinHoyoverse.JSON
             userAgent.Add("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.107 Safari/537.36 OPR/77.0.4054.277");
             userAgent.Add("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
             userAgent.Add("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.131 Safari/537.36");
-            current_user_agent = 0;
+            current_user_agent = new Random().Next(0, userAgent.Count - 1);
             lang = "en-us";
             api_lang = "https://bbs-api-os.hoyolab.com/community/misc/wapi/langs";
+            notification = false;
         }
     }
 
