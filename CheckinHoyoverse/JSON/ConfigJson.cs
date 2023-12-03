@@ -75,6 +75,9 @@ namespace CheckinHoyoverse.JSON
         [JsonPropertyName("hoyolab")]
         public bool hoyolab { get; set; }
 
+        [JsonPropertyName("active")]
+        public bool active { get; set; }
+
         public Data()
         {
             name = string.Empty;
@@ -84,6 +87,7 @@ namespace CheckinHoyoverse.JSON
             hsr = false;
             tot = false;
             hoyolab = false;
+            active = true;
         }
 
         public override string ToString()

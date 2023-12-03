@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "CheckinHoyoverse"
-#define MyAppVersion "1.1.4"
+#define MyAppVersion "1.1.5"
 #define MyAppPublisher "Kaga Akatsuki"
 #define MyAppExeName "CheckinHoyoverse.exe"
 #define MyAppAssocName MyAppName + " File"
@@ -15,7 +15,7 @@
 AppId={{BBEA5626-CA2E-4676-8667-C6900E59686C}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
-;AppVerName={#MyAppName} {#MyAppVersion}
+AppVerName={#MyAppName}
 AppPublisher={#MyAppPublisher}
 DefaultDirName={autopf}\{#MyAppName}
 ChangesAssociations=yes
@@ -27,7 +27,7 @@ PrivilegesRequiredOverridesAllowed=dialog
 OutputDir=Setup\{#MyAppVersion}
 OutputBaseFilename=CheckinHoyoverse-v{#MyAppVersion}
 SetupIconFile=CheckinHoyoverse\favicon.ico
-Compression=lzma
+Compression=lzma2/fast
 SolidCompression=yes
 WizardStyle=modern
 

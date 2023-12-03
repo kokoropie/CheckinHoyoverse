@@ -39,7 +39,7 @@ namespace CheckinHoyoverse
         static readonly string key = "KagaAkatsuki0705";
         static readonly string keyStartup = $"{appName} startup";
         static readonly string guid = "BBEA5626-CA2E-4676-8667-C6900E59686C";
-        static readonly string version = "1.1.4";
+        static readonly string version = "1.1.5";
         static readonly RegistryKey rk = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
 
         static ConfigJson? config = null;
@@ -429,6 +429,7 @@ namespace CheckinHoyoverse
 
             foreach (Data data in config.data)
             {
+                if (!data.active) continue;
                 //NotificationData toastData = new NotificationData();
 
                 //toastData.SequenceNumber = i;
@@ -977,9 +978,9 @@ namespace CheckinHoyoverse
         {
             Console.Clear();
 
-            ConsoleTable table = new ConsoleTable($"Name ({config.data.Count})", "GI", "HI3", "HSR", "TOT", "HoYoLAB");
+            ConsoleTable table = new ConsoleTable($"Name ({config.data.Count})", "GI", "HI3", "HSR", "TOT", "HoYoLAB", "Active");
             config.data.ForEach(data => {
-                table.AddRow(data.name, data.gi ? "Y" : "N", data.hi3 ? "Y" : "N", data.hsr ? "Y" : "N", data.tot ? "Y" : "N", data.hoyolab ? "Y" : "N");
+                table.AddRow(data.name, data.gi ? "Y" : "N", data.hi3 ? "Y" : "N", data.hsr ? "Y" : "N", data.tot ? "Y" : "N", data.hoyolab ? "Y" : "N", data.active ? "Y" : "N");
             });
             table.Write(Format.MarkDown);
 
@@ -1096,6 +1097,12 @@ namespace CheckinHoyoverse
                 ConsoleKey hoyolab = Console.ReadKey().Key;
                 if ((hoyolab == ConsoleKey.Y && !currentData.hoyolab) || (hoyolab == ConsoleKey.N && currentData.hoyolab))
                     currentData.hoyolab = !currentData.hoyolab;
+
+                Console.Write("\r" + new String(' ', Console.WindowWidth));
+                Console.Write("\rActive? [{0}] ", currentData.active? "\u001b[33mY\u001b[0m/N" : "Y/\u001b[33mN\u001b[0m");
+                ConsoleKey active = Console.ReadKey().Key;
+                if ((active == ConsoleKey.Y && !currentData.active) || (active == ConsoleKey.N && currentData.active))
+                    currentData.active = !currentData.active;
 
                 Log($"[TO] {currentData}", $"{logFile}.action.log", false);
             } else {
