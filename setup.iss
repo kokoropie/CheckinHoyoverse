@@ -27,7 +27,7 @@ PrivilegesRequiredOverridesAllowed=dialog
 OutputDir=Setup\{#MyAppVersion}
 OutputBaseFilename=CheckinHoyoverse-v{#MyAppVersion}
 SetupIconFile=CheckinHoyoverse\favicon.ico
-Compression=lzma2/fast
+Compression=lzma2/ultra64
 SolidCompression=yes
 WizardStyle=modern
 
