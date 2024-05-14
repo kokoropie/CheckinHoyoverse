@@ -1,6 +1,6 @@
 # CheckinHoyoverse
 Using cookies and api hoyoverse to checkin web (support only OS server and Windows)
-# How to get cookies?
+# How to get cookies? (not work now)
 * Copy this `alert(document.cookie)`
 * Open browser to checkin web
 * Run in Console Tab in F12
